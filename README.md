@@ -8,15 +8,6 @@
  See https://gitlab.hacknix.net/hacknix/FreeDMR/-/wikis/Installing-using-Docker-(recommended!) for more details.
 
  To install using the docker method from your server console enter the following command.
-
-
-	
-
- 
-
-
- <hr>
- 
 install.sh
 ----------
 
@@ -44,12 +35,8 @@ Install FreeDMR Server and/or HBMonv2 Dashboard
 -----------------------------------------------
 
 This will install and setup the FreeDMR Server With or With Out a Dashboard
+I recommend SUDO mode
 
-
-
-I recommend SUDO mode.
-
-Method 2
         apt-get update && apt upgrade 
         apt-get install git 
         wget http://bootstrap.pypa.io/get-pip.py 
@@ -62,5 +49,3 @@ Method 2
 	cd /opt/freedmr-installer
 	bash install.sh
 	
-
-You can setup the dashboard to monitor the Server either locally or remotely.
