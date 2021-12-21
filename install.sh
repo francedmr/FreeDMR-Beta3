@@ -39,10 +39,11 @@ fi
 
 # Set version numbers
 
-version="1.05"
+version="1.06"
 
 # Change Log
 
+# v1.06     Added D-PRS to Docker and Hybrid Installs
 # v1.05		Passworn Length Checking for NORMAL INSTALL - 8 Characters Minimum
 # v1.04		Fix Some Bugs
 # v1.03		Change Logo Setup
@@ -65,10 +66,7 @@ echo -e "\x1b[34m        |  _| '__/ _ \/ _ \ | | | |\/| ||    /      | || '_ \/ 
 echo -e "\x1b[35m        | | | | |  __/  __/ |/ /| |  | || |\ \     _| || | | \__ \ || (_| | | |  __/ |    ";
 echo -e "\x1b[36m        \_| |_|  \___|\___|___/ \_|  |_/\_| \_|    \___/_| |_|___/\__\__,_|_|_|\___|_|    ";
 echo
-echo -e "\x1b[37m                          This script Copyright OZ-DMR Networks © 2021                    ";
-echo -e "\x1b[38m                        This script Copyright FRANCE-DMR Networks © 2021                  ";
-echo -e "\x1b[39m                          This script Copyright FR86FB  Frèdéric © 2021                   ";
-echo -e "\x1b[40m                            This Freedmr server in 446 Mhz  DMR Libre                     ";
+echo -e "\x1b[37m                          This script Copyright FRANCE-DMR Networks © 2021                    ";
 echo
 echo "                                          Version $version";
 echo
@@ -81,25 +79,6 @@ function pre-install () {
 splash
 echo Just doing some PRE-INSTALL setup ...
 sleep 3
-
-# Get Current IP addresses
-
-intip="$(ip route get 1.1.1.1 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')"
-extip="$(curl  --silent ifconfig.me)"
-
-# Set Parameters Defaults
-
-s_id="0"
-menu=""
-serv_ip="127.0.0.1"
-install="NOT SELECTED"
-opb="62035-62085"
-dockeropb="$opb:$opb"
-uport="62031"
-pword="passw0rd"
-usepword="False"
-dashboard="NOT SELECTED"
-name="FreeDMR Server & HBMonv2 Dashboard Installer"
 
 # Stop Services the Might be Running
 
@@ -175,6 +154,30 @@ if [ $(dpkg-query -W -f='${Status}' whois 2>/dev/null | grep -c "ok installed") 
 then
   apt-get --assume-yes install whois;
 fi
+
+# Get Current IP addresses
+
+intip="$(ip route get 1.1.1.1 | sed -n '/src/{s/.*src *\([^ ]*\).*/\1/p;q}')"
+extip="$(curl  --silent ifconfig.me)"
+
+# Set Parameters Defaults
+#
+# Do not modify the Paramaters below
+#
+
+s_id="0"
+menu=""
+serv_ip="127.0.0.1"
+install="NOT SELECTED"
+opb="62035-62085"
+dockeropb="$opb:$opb"
+uport="62031"
+pword="passw0rd"
+usepword="False"
+dashboard="NOT SELECTED"
+name="FreeDMR Server & HBMonv2 Dashboard Installer"
+aprscall=""
+aprspass=""
 }
 
 function welcome () {
@@ -300,8 +303,18 @@ function docker_config () {
 clear
 splash
 echo
-echo FreeDMR DOCKER Install Config
+echo FreeDMR DOCKER Install Config with D-PRS Gateway
 echo
+echo
+echo You can leave the next 2 question blank. However until you change them in the config D-PRS will not work
+echo
+echo
+read -p "Enter the CALLSIGN to be used to forward D-PRS packets? " aprscall
+aprscall=${aprscall:-nocall}
+aprscall=${aprscall^^}
+echo
+read -p "Enter the PASSCODE for "$aprscall" : " aprspass
+aprspass=${aprspass:-12960}
 docker_install
 }
 
@@ -309,8 +322,18 @@ function hybrid_config () {
 clear
 splash
 echo
-echo FreeDMR HYBRID Install Config
+echo FreeDMR HYBRID Install Config with D-PRS Gateway
 echo
+echo
+echo You can leave the next 2 question blank. However until you change them in the config D-PRS will not work
+echo
+echo
+read -p "Enter the CALLSIGN to be used to forward D-PRS packets? " aprscall
+aprscall=${aprscall:-nocall}
+aprscall=${aprscall^^}
+echo
+read -p "Enter the PASSCODE for "$aprscall" : " aprspass
+aprspass=${aprspass:-12960}
 hybrid_install
 }
 
@@ -529,7 +552,7 @@ splash
 echo
 echo Installing FreeDMR DOCKER Server
 echo
-echo Would you like to install a DASHBOARD with your FreeDMR DOCKER install ?
+echo Would you like to install a DOCKER DASHBOARD with your FreeDMR DOCKER install ?
 echo
 
 read -p "Please select which you would like ?  Y / N  : " install
@@ -590,8 +613,8 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: True
 ALLOW_NULL_PASSPHRASE: True
-ANNOUNCEMENT_LANGUAGES: fr_FR
-SERVER_ID: 0000
+ANNOUNCEMENT_LANGUAGES: en_GB,en_US,es_ES,fr_FR,de_DE,dk_DK,it_IT,no_NO,pl_PL,se_SE,pt_PT,cy_GB,el_GR,CW
+SERVER_ID: 0
 DATA_GATEWAY: False
 
 [REPORTS]
@@ -649,7 +672,7 @@ MAX_PEERS: 1
 EXPORT_AMBE: False
 IP: 127.0.0.1
 PORT: 54000
-PASSPHRASE: passw0rd
+PASSPHRASE:
 GROUP_HANGTIME: 5
 USE_ACL: True
 REG_ACL: DENY:1
@@ -662,7 +685,7 @@ VOICE_IDENT: True
 TS1_STATIC:
 TS2_STATIC:
 DEFAULT_REFLECTOR: 0
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 GENERATOR: 100
 
 [D-APRS]
@@ -687,7 +710,7 @@ TS1_STATIC:
 TS2_STATIC:
 DEFAULT_REFLECTOR: 0
 GENERATOR: 0
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 
 [ECHO]
 MODE: PEER
@@ -720,7 +743,7 @@ USE_ACL: True
 SUB_ACL: DENY:1
 TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 EOF
 
 echo
@@ -796,6 +819,18 @@ services:
             #Override proxy external port
             #- FDPROXY_LISTENPORT=62031
         read_only: "true"
+
+    D-APRS:
+        container_name: D-APRS
+        environment:
+          - APRS_CALL=$aprscall
+          - APRS_PASSCODE=$aprspass
+        image: 'gitlab.hacknix.net:5050/hacknix/docker-freedmr-kf7eel-gps_data:development-latest'
+        #Container will persist over reboots
+        restart: "unless-stopped"
+        networks:
+           app_net:
+             ipv4_address: 172.16.238.40
 
     ipv6nat:
         container_name: ipv6nat
@@ -927,8 +962,8 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: True
 ALLOW_NULL_PASSPHRASE: True
-ANNOUNCEMENT_LANGUAGES: fr_FR
-SERVER_ID: 0000
+ANNOUNCEMENT_LANGUAGES: en_GB,en_US,es_ES,fr_FR,de_DE,dk_DK,it_IT,no_NO,pl_PL,se_SE,pt_PT,cy_GB,el_GR,CW
+SERVER_ID: 0
 DATA_GATEWAY: False
 
 [REPORTS]
@@ -986,7 +1021,7 @@ MAX_PEERS: 1
 EXPORT_AMBE: False
 IP: 127.0.0.1
 PORT: 54000
-PASSPHRASE: passw0rd
+PASSPHRASE:
 GROUP_HANGTIME: 5
 USE_ACL: True
 REG_ACL: DENY:1
@@ -999,7 +1034,7 @@ VOICE_IDENT: True
 TS1_STATIC:
 TS2_STATIC:
 DEFAULT_REFLECTOR: 0
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 GENERATOR: 100
 
 [ECHO]
@@ -1033,7 +1068,7 @@ USE_ACL: True
 SUB_ACL: DENY:1
 TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 EOF
 
 echo
@@ -1106,6 +1141,18 @@ services:
             #- FDPROXY_LISTENPORT=62031
         read_only: "true"
 
+    D-APRS:
+        container_name: D-APRS
+        environment:
+          - APRS_CALL=$aprscall
+          - APRS_PASSCODE=$aprspass
+        image: 'gitlab.hacknix.net:5050/hacknix/docker-freedmr-kf7eel-gps_data:development-latest'
+        #Container will persist over reboots
+        restart: "unless-stopped"
+        networks:
+           app_net:
+             ipv4_address: 172.16.238.40
+
     ipv6nat:
         container_name: ipv6nat
         image: 'robbertkl/ipv6nat'
@@ -1147,7 +1194,7 @@ echo
 echo Installing Required Packages ...
 apt-get -y install docker.io
 apt-get -y install docker-compose
-apt-get -y  install conntrack
+apt-get -y install conntrack
 apt-get install python3-pip
 
 echo '{ "userland-proxy": false}' > /etc/docker/daemon.json
@@ -1187,8 +1234,8 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: True
 ALLOW_NULL_PASSPHRASE: True
-ANNOUNCEMENT_LANGUAGES: fr_FR
-SERVER_ID: 0000
+ANNOUNCEMENT_LANGUAGES: en_GB,en_US,es_ES,fr_FR,de_DE,dk_DK,it_IT,no_NO,pl_PL,se_SE,pt_PT,cy_GB,el_GR,CW
+SERVER_ID: 0
 DATA_GATEWAY: False
 
 [REPORTS]
@@ -1209,7 +1256,7 @@ PATH: ./
 PEER_FILE: peer_ids.json
 SUBSCRIBER_FILE: subscriber_ids.json
 TGID_FILE: talkgroup_ids.json
-PEER_URL: https://www.radioid.net/static/rptrs.json
+PEER_URL: https://www.france-dmr.fr/static/rptrs.json
 SUBSCRIBER_URL: https://www.france-dmr.fr/static/local_subscriber_ids.json
 TGID_URL: TGID_URL: https://www.france-dmr.fr/static/talkgroup_ids.json
 STALE_DAYS: 7
@@ -1246,7 +1293,7 @@ MAX_PEERS: 1
 EXPORT_AMBE: False
 IP: 127.0.0.1
 PORT: 54000
-PASSPHRASE: passw0rd
+PASSPHRASE:
 GROUP_HANGTIME: 5
 USE_ACL: True
 REG_ACL: DENY:1
@@ -1259,8 +1306,32 @@ VOICE_IDENT: True
 TS1_STATIC:
 TS2_STATIC:
 DEFAULT_REFLECTOR: 0
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 GENERATOR: 100
+
+[D-APRS]
+MODE: MASTER
+ENABLED: True
+REPEAT: True
+MAX_PEERS: 1
+EXPORT_AMBE: False
+IP:
+PORT: 52555
+PASSPHRASE:
+GROUP_HANGTIME: 0
+USE_ACL: True
+REG_ACL: DENY:1
+SUB_ACL: DENY:1
+TGID_TS1_ACL: PERMIT:ALL
+TGID_TS2_ACL: PERMIT:ALL
+DEFAULT_UA_TIMER: 10
+SINGLE_MODE: False
+VOICE_IDENT: False
+TS1_STATIC:
+TS2_STATIC:
+DEFAULT_REFLECTOR: 0
+GENERATOR: 0
+ANNOUNCEMENT_LANGUAGE: en_GB
 
 [ECHO]
 MODE: PEER
@@ -1293,7 +1364,7 @@ USE_ACL: True
 SUB_ACL: DENY:1
 TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 EOF
 
 echo
@@ -1365,6 +1436,18 @@ services:
             #Override proxy external port
             #- FDPROXY_LISTENPORT=62031
         read_only: "true"
+
+    D-APRS:
+        container_name: D-APRS
+        environment:
+          - APRS_CALL=$aprscall
+          - APRS_PASSCODE=$aprspass
+        image: 'gitlab.hacknix.net:5050/hacknix/docker-freedmr-kf7eel-gps_data:development-latest'
+        #Container will persist over reboots
+        restart: "unless-stopped"
+        networks:
+           app_net:
+             ipv4_address: 172.16.238.40
 
     ipv6nat:
         container_name: ipv6nat
@@ -1460,6 +1543,9 @@ define("HEIGHT_ACTIVITY","45px");
 //
 // Theme colors define
 //
+// Orange
+//define("THEME_COLOR","background-color:#FFA500;color:black;");
+
 // Green 
 //define("THEME_COLOR","background-color:#4a8f3c;color:white;");
 
@@ -1615,8 +1701,8 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: True
 ALLOW_NULL_PASSPHRASE: $usepword
-ANNOUNCEMENT_LANGUAGES: fr_FR
-SERVER_ID: 0000
+ANNOUNCEMENT_LANGUAGES: en_GB,en_US,es_ES,fr_FR,de_DE,dk_DK,it_IT,no_NO,pl_PL,se_SE,pt_PT,cy_GB,el_GR,CW
+SERVER_ID: 0
 DATA_GATEWAY: False
 
 [REPORTS]
@@ -1687,7 +1773,7 @@ VOICE_IDENT: True
 TS1_STATIC:
 TS2_STATIC:
 DEFAULT_REFLECTOR: 0
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 GENERATOR: 100
 
 [ECHO]
@@ -1721,7 +1807,7 @@ USE_ACL: True
 SUB_ACL: DENY:1
 TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 EOF
 
 echo
@@ -2009,7 +2095,7 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: False
 ALLOW_NULL_PASSPHRASE: False
-ANNOUNCEMENT_LANGUAGES: fr_FR
+ANNOUNCEMENT_LANGUAGES: en_GB_2
 SERVER_ID: 9990
 DATA_GATEWAY: False
 
@@ -2081,7 +2167,7 @@ TS1_STATIC:
 TS2_STATIC: 
 DEFAULT_REFLECTOR: 0
 GENERATOR: 1
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB_2
 EOF
 
 if [[ dashboard="YES" ]]; then
@@ -2143,6 +2229,9 @@ define("HEIGHT_ACTIVITY","45px");
 //
 // Theme colors define
 //
+// Orange
+//define("THEME_COLOR","background-color:#FFA500;color:black;");
+
 // Green 
 //define("THEME_COLOR","background-color:#4a8f3c;color:white;");
 
@@ -2349,7 +2438,7 @@ if [[ dashboard="YES" ]]; then
 
 	cd /opt
 	sudo rm -fR /opt/HBMonv2
-	git clone https://gitlab.hacknix.net/haccknix/HBMonv2.git
+	git clone https://gitlab.hacknix.net/oz-dmr/HBMonv2.git
 fi
 
 echo
@@ -2366,8 +2455,8 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: True
 ALLOW_NULL_PASSPHRASE: $usepword
-ANNOUNCEMENT_LANGUAGES: fr_FR
-SERVER_ID: 0000
+ANNOUNCEMENT_LANGUAGES: en_GB,en_US,es_ES,fr_FR,de_DE,dk_DK,it_IT,no_NO,pl_PL,se_SE,pt_PT,cy_GB,el_GR,CW
+SERVER_ID: 0
 DATA_GATEWAY: False
 
 [REPORTS]
@@ -2425,7 +2514,7 @@ MAX_PEERS: 10
 EXPORT_AMBE: False
 IP: 127.0.0.1
 PORT: 54000
-PASSPHRASE: passw0rd
+PASSPHRASE: s3cr3tpa55w0rd
 GROUP_HANGTIME: 5
 USE_ACL: True
 REG_ACL: DENY:1
@@ -2438,7 +2527,7 @@ VOICE_IDENT: True
 TS1_STATIC:
 TS2_STATIC:
 DEFAULT_REFLECTOR: 0
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 GENERATOR: 100
 
 [ECHO]
@@ -2455,7 +2544,7 @@ CALLSIGN: ECHO
 RADIO_ID: 1000001
 RX_FREQ: 000000
 TX_FREQ: 000000
-TX_POWER: 25
+TX_POWER: 0
 COLORCODE: 1
 SLOTS: 1
 LATITUDE: 00.0000
@@ -2472,7 +2561,7 @@ USE_ACL: True
 SUB_ACL: DENY:1
 TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB
 EOF
 
 echo
@@ -2491,7 +2580,7 @@ TGID_TS1_ACL: PERMIT:ALL
 TGID_TS2_ACL: PERMIT:ALL
 GEN_STAT_BRIDGES: False
 ALLOW_NULL_PASSPHRASE: False
-ANNOUNCEMENT_LANGUAGES: fr_FR
+ANNOUNCEMENT_LANGUAGES: en_GB_2
 SERVER_ID: 9990
 DATA_GATEWAY: False
 
@@ -2563,7 +2652,7 @@ TS1_STATIC:
 TS2_STATIC: 
 DEFAULT_REFLECTOR: 0
 GENERATOR: 1
-ANNOUNCEMENT_LANGUAGE: fr_FR
+ANNOUNCEMENT_LANGUAGE: en_GB_2
 EOF
 
 if [[ dashboard="YES" ]]; then
@@ -2625,6 +2714,9 @@ define("HEIGHT_ACTIVITY","45px");
 //
 // Theme colors define
 //
+// Orange
+//define("THEME_COLOR","background-color:#FFA500;color:black;");
+
 // Green 
 //define("THEME_COLOR","background-color:#4a8f3c;color:white;");
 
@@ -2858,6 +2950,9 @@ define("HEIGHT_ACTIVITY","45px");
 //
 // Theme colors define
 //
+// Orange
+//define("THEME_COLOR","background-color:#FFA500;color:black;");
+
 // Green 
 //define("THEME_COLOR","background-color:#4a8f3c;color:white;");
 
