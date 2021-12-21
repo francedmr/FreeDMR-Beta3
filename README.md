@@ -11,7 +11,7 @@
 
 
          apt-get update && apt upgrade
-         curl https://github.com/francedmr/FreeDMR/-/raw/master/docker-configs/docker-compose_install.sh | bash	
+         curl https://github.com/francedmr/FreeDMR/-/raw/master/FreeDMR-Beta3/docker-compose_install.sh | bash	
 
 
  
@@ -56,8 +56,8 @@ I recommend SUDO mode (Method 1).
 Method 1
 
 	cd /opt
-	git clone https://github.com/francedmr/freedmr-installer.git
-	cd /opt/freedmr-installer
+	git clone https://github.com/francedmr/.FreeDMR-Beta3.git
+	cd /opt/FreeDMR-Beta3
 	bash install.sh
 	
 
@@ -67,7 +67,7 @@ or
 
 Method 2
 
-	wget https://github.com/francedmr/freedmr-installer/-/raw/main/install.sh -O install.sh && bash install.sh
+	wget https://github.com/francedmr/FreeDMR-Beta3/-/raw/main/install.sh -O install.sh && bash install.sh
 
 
 
